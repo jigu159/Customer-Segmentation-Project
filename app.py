@@ -29,7 +29,6 @@ def load_data():
 
 df = pd.read_csv(file_path)
 
-     
      return df
 
 
