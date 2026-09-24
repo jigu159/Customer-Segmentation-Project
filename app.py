@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import mysql.connector
+import os
 
 
 # ============================================================
@@ -14,21 +14,6 @@ st.set_page_config(
     layout="wide"
 )
 
-
-# ============================================================
-# MYSQL CONNECTION
-# ============================================================
-
-def get_mysql_connection():
-
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="MySQL@0915",
-        database="customer_segmentation_db"
-    )
-
-
 # ============================================================
 # LOAD CUSTOMER DATA
 # ============================================================
@@ -36,10 +21,13 @@ def get_mysql_connection():
 @st.cache_data
 def load_data():
 
-    df = pd.read_csv(
-        "data/customer_segmentation_exact.csv"
-    )
+    file_path = (
+    "data/customer_segmentation_exact.csv"
+    if os.path.exists("data/customer_segmentation_exact.csv")
+    else "customer_segmentation_exact.csv"
+)
 
+df = pd.read_csv(file_path)
     return df
 
 
