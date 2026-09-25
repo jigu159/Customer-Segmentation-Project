@@ -13,68 +13,6 @@ st.set_page_config(
     page_icon="👥",
     layout="wide"
 )
-# ============================================================
-# APP DESIGN / THEME
-# ============================================================
-
-st.markdown("""
-<style>
-
-    /* Main background */
-    [data-testid="stAppViewContainer"] {
-        background: #f4f7fb;
-    }
-
-    /* Top header */
-    [data-testid="stHeader"] {
-        background: transparent;
-    }
-
-    /* Main content */
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        max-width: 1400px;
-    }
-
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a, #1e293b);
-    }
-
-    [data-testid="stSidebar"] * {
-        color: white !important;
-    }
-
-    /* Headings */
-    h1 {
-        color: #0f172a;
-        font-weight: 800;
-    }
-
-    h2, h3 {
-        color: #1e293b;
-        font-weight: 700;
-    }
-
-    /* Metric cards */
-    [data-testid="stMetric"] {
-        background: white;
-        padding: 18px;
-        border-radius: 14px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
-    }
-
-    /* Tables */
-    [data-testid="stDataFrame"] {
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-    }
-
-</style>
-""", unsafe_allow_html=True)
 
 # ============================================================
 # LOAD CUSTOMER DATA
