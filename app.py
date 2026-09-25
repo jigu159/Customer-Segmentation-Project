@@ -20,27 +20,20 @@ st.set_page_config(
 
 @st.cache_data
 def load_data():
-
     file_path = (
-    "data/customer_segmentation_exact.csv"
-    if os.path.exists("data/customer_segmentation_exact.csv")
-    else "customer_segmentation_exact.csv"
-)
-
-df = pd.read_csv(file_path)
-
-     return df
+        "data/customer_segmentation_exact.csv"
+        if os.path.exists("data/customer_segmentation_exact.csv")
+        else "customer_segmentation_exact.csv"
+    )
+    return pd.read_csv(file_path)
 
 
 try:
-
     df = load_data()
 
 except Exception as e:
-
     st.error(f"Unable to load dataset: {e}")
     st.stop()
-
 
 # ============================================================
 # SIDEBAR NAVIGATION
