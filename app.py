@@ -60,7 +60,7 @@ if "selected_customer_id" not in st.session_state:
 # GLOBAL DESIGN
 # ============================================================
 
-st.markdown("""
+st.html("""
 <style>
 
     /* -------------------------------------------------------
@@ -331,7 +331,7 @@ customer = selected_data.iloc[0]
 # SIDEBAR
 # ============================================================
 
-st.sidebar.markdown(
+st.sidebar.html(
     """
     <div style="
         text-align:center;
