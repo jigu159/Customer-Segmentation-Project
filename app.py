@@ -1,7 +1,7 @@
+import os
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 
 
 # ============================================================
@@ -9,216 +9,497 @@ import os
 # ============================================================
 
 st.set_page_config(
-    page_title="Customer Segmentation & Marketing",
+    page_title="Customer Segmentation Platform",
     page_icon="👥",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
+
 # ============================================================
-# LOAD CUSTOMER DATA
+# LOAD DATA
 # ============================================================
 
 @st.cache_data
 def load_data():
+
     file_path = (
         "data/customer_segmentation_exact.csv"
         if os.path.exists("data/customer_segmentation_exact.csv")
         else "customer_segmentation_exact.csv"
     )
+
     return pd.read_csv(file_path)
 
 
 try:
+
     df = load_data()
 
 except Exception as e:
-    st.error(f"Unable to load dataset: {e}")
+
+    st.error(f"Unable to load customer data: {e}")
     st.stop()
+
+
 # ============================================================
-# CUSTOM SIDEBAR
+# SESSION STATE
 # ============================================================
 
-# Default page
 if "page" not in st.session_state:
     st.session_state.page = "🏠 Home"
 
-# Selected customer
 if "selected_customer_id" not in st.session_state:
+
     st.session_state.selected_customer_id = str(
         df["CustomerID"].iloc[0]
     )
 
 
-# ------------------------------------------------------------
-# SIDEBAR STYLE
-# ------------------------------------------------------------
+# ============================================================
+# GLOBAL DESIGN
+# ============================================================
 
 st.markdown("""
 <style>
 
-[data-testid="stSidebar"] {
-    background: #172554;
-}
+    /* -------------------------------------------------------
+       MAIN APPLICATION
+       ------------------------------------------------------- */
 
-[data-testid="stSidebar"] > div:first-child {
-    padding-top: 1.5rem;
-}
+    [data-testid="stAppViewContainer"] {
+        background-color: #f7f9fc;
+    }
 
-.sidebar-brand {
-    text-align: center;
-    padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.25);
-    margin-bottom: 20px;
-}
+    [data-testid="stHeader"] {
+        background-color: #f7f9fc;
+    }
 
-.sidebar-brand-icon {
-    font-size: 38px;
-}
+    .block-container {
+        padding-top: 1.5rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        max-width: 1500px;
+    }
 
-.sidebar-brand-title {
-    color: white;
-    font-size: 21px;
-    font-weight: 800;
-    line-height: 1.15;
-}
 
-.sidebar-brand-subtitle {
-    color: #cbd5e1;
-    font-size: 13px;
-    margin-top: 5px;
-}
+    /* -------------------------------------------------------
+       SIDEBAR
+       ------------------------------------------------------- */
 
-.sidebar-section-title {
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
+    [data-testid="stSidebar"] {
+        background: #16243b;
+    }
+
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 1.5rem;
+    }
+
+    [data-testid="stSidebar"] label {
+        color: white !important;
+        font-weight: 600 !important;
+    }
+
+    [data-testid="stSidebar"] p {
+        color: white;
+    }
+
+    [data-testid="stSidebar"] input {
+        background: white !important;
+        color: #111827 !important;
+        border-radius: 7px !important;
+    }
+
+    [data-testid="stSidebar"] button {
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+
+
+    /* -------------------------------------------------------
+       HEADINGS
+       ------------------------------------------------------- */
+
+    h1 {
+        color: #172033 !important;
+        font-weight: 800 !important;
+    }
+
+    h2, h3 {
+        color: #24344d !important;
+        font-weight: 700 !important;
+    }
+
+
+    /* -------------------------------------------------------
+       TOP CARDS
+       ------------------------------------------------------- */
+
+    .top-card {
+
+        background: white;
+
+        border-radius: 14px;
+
+        border: 1px solid #e2e8f0;
+
+        padding: 22px;
+
+        min-height: 155px;
+
+        box-shadow:
+            0 4px 14px rgba(15, 23, 42, 0.08);
+
+    }
+
+    .top-card-blue {
+
+        background: #eef5ff;
+
+        border: 1px solid #cbdcff;
+
+    }
+
+    .top-card-green {
+
+        background: #eefbf4;
+
+        border: 1px solid #c9efd9;
+
+    }
+
+    .top-card-yellow {
+
+        background: #fff8e8;
+
+        border: 1px solid #f2dfae;
+
+    }
+
+    .card-small-title {
+
+        font-size: 15px;
+
+        font-weight: 700;
+
+        color: #475569;
+
+        margin-bottom: 10px;
+
+    }
+
+    .card-value {
+
+        font-size: 27px;
+
+        font-weight: 800;
+
+        margin-bottom: 10px;
+
+    }
+
+    .blue-value {
+        color: #2456d8;
+    }
+
+    .green-value {
+        color: #15945b;
+    }
+
+    .yellow-value {
+        color: #d99416;
+    }
+
+
+    /* -------------------------------------------------------
+       PROFILE CARD
+       ------------------------------------------------------- */
+
+    .profile-box {
+
+        background: white;
+
+        border: 1px solid #e2e8f0;
+
+        border-radius: 14px;
+
+        padding: 18px;
+
+        box-shadow:
+            0 4px 14px rgba(15, 23, 42, 0.06);
+
+    }
+
+
+    /* -------------------------------------------------------
+       MARKETING CARDS
+       ------------------------------------------------------- */
+
+    .marketing-card {
+
+        background: white;
+
+        border: 1px solid #e2e8f0;
+
+        border-radius: 13px;
+
+        padding: 18px;
+
+        min-height: 150px;
+
+        box-shadow:
+            0 3px 10px rgba(15, 23, 42, 0.06);
+
+    }
+
+    .marketing-title {
+
+        font-size: 17px;
+
+        font-weight: 800;
+
+        margin-bottom: 10px;
+
+    }
+
+    .marketing-text {
+
+        font-size: 14px;
+
+        color: #475569;
+
+        line-height: 1.5;
+
+    }
+
+
+    /* -------------------------------------------------------
+       INFO BOXES
+       ------------------------------------------------------- */
+
+    [data-testid="stAlert"] {
+
+        border-radius: 10px;
+
+    }
+
+
+    /* -------------------------------------------------------
+       TABLE
+       ------------------------------------------------------- */
+
+    [data-testid="stDataFrame"] {
+
+        border-radius: 12px;
+
+        overflow: hidden;
+
+        border: 1px solid #e2e8f0;
+
+    }
 
 </style>
 """, unsafe_allow_html=True)
 
 
-# ------------------------------------------------------------
-# APP BRANDING
-# ------------------------------------------------------------
+# ============================================================
+# SELECTED CUSTOMER
+# ============================================================
 
-st.sidebar.markdown("""
-<div class="sidebar-brand">
+selected_id = str(
+    st.session_state.selected_customer_id
+)
 
-    <div class="sidebar-brand-icon">👥</div>
+selected_data = df[
+    df["CustomerID"].astype(str) == selected_id
+]
 
-    <div class="sidebar-brand-title">
-        Customer Segmentation<br>
-        Platform
-    </div>
+if selected_data.empty:
 
-    <div class="sidebar-brand-subtitle">
-        Personalized Marketing Analytics
-    </div>
+    selected_id = str(
+        df["CustomerID"].iloc[0]
+    )
 
-</div>
-""", unsafe_allow_html=True)
+    selected_data = df[
+        df["CustomerID"].astype(str) == selected_id
+    ]
+
+customer = selected_data.iloc[0]
 
 
-# ------------------------------------------------------------
-# CUSTOMER DETAILS
-# ------------------------------------------------------------
+# ============================================================
+# SIDEBAR
+# ============================================================
 
 st.sidebar.markdown(
-    '<div class="sidebar-section-title">'
-    'Enter Customer Details'
-    '</div>',
+    """
+    <div style="
+        text-align:center;
+        padding:5px 5px 20px 5px;
+        border-bottom:1px solid rgba(255,255,255,0.25);
+        margin-bottom:20px;
+    ">
+
+        <div style="
+            font-size:34px;
+            margin-bottom:5px;
+        ">
+            👥
+        </div>
+
+        <div style="
+            color:white;
+            font-size:20px;
+            font-weight:800;
+            line-height:1.2;
+        ">
+            Customer Segmentation<br>
+            Platform
+        </div>
+
+        <div style="
+            color:#cbd5e1;
+            font-size:12px;
+            margin-top:7px;
+        ">
+            Personalized Marketing Analytics
+        </div>
+
+    </div>
+    """,
     unsafe_allow_html=True
+)
+
+
+# ============================================================
+# CUSTOMER DETAILS
+# ============================================================
+
+st.sidebar.markdown(
+    """
+    <div style="
+        color:white;
+        font-size:16px;
+        font-weight:800;
+        margin-bottom:10px;
+    ">
+        Enter Customer Details
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+customer_ids = sorted(
+    df["CustomerID"]
+    .dropna()
+    .astype(str)
+    .tolist()
 )
 
 
 customer_input = st.sidebar.text_input(
     "Customer ID",
-    value=str(st.session_state.selected_customer_id)
+    value=selected_id
 )
 
 
-# Find customer
-typed_customer = df[
-    df["CustomerID"].astype(str) == str(customer_input).strip()
+input_customer = df[
+    df["CustomerID"].astype(str)
+    == customer_input.strip()
 ]
 
 
-if not typed_customer.empty:
+if not input_customer.empty:
 
-    sidebar_customer = typed_customer.iloc[0]
+    input_row = input_customer.iloc[0]
 
-    sidebar_age = sidebar_customer["Age"]
-    sidebar_income = sidebar_customer["AnnualIncome"]
-    sidebar_purchase = sidebar_customer["PurchaseHistory"]
-    sidebar_spending = sidebar_customer["SpendingScore"]
+    sidebar_age = int(input_row["Age"])
+
+    sidebar_income = float(
+        input_row["AnnualIncome"]
+    )
+
+    sidebar_purchase = int(
+        input_row["PurchaseHistory"]
+    )
+
+    sidebar_spending = float(
+        input_row["SpendingScore"]
+    )
 
 else:
 
-    sidebar_age = ""
-    sidebar_income = ""
-    sidebar_purchase = ""
-    sidebar_spending = ""
+    sidebar_age = 0
+
+    sidebar_income = 0.0
+
+    sidebar_purchase = 0
+
+    sidebar_spending = 0.0
 
 
 st.sidebar.number_input(
     "Age",
-    value=int(sidebar_age) if sidebar_age != "" else 0,
+    value=sidebar_age,
     disabled=True
 )
+
 
 st.sidebar.number_input(
     "Income (₹)",
-    value=float(sidebar_income) if sidebar_income != "" else 0.0,
+    value=sidebar_income,
+    step=1000.0,
     disabled=True
 )
 
+
 st.sidebar.number_input(
-    "Purchase History",
-    value=int(sidebar_purchase) if sidebar_purchase != "" else 0,
+    "Purchase History\n(Number of Purchases)",
+    value=sidebar_purchase,
     disabled=True
 )
+
 
 st.sidebar.number_input(
     "Spending Score (1 - 100)",
-    value=float(sidebar_spending) if sidebar_spending != "" else 0.0,
+    value=sidebar_spending,
     disabled=True
 )
 
 
-# ------------------------------------------------------------
-# PREDICT / LOAD CUSTOMER BUTTON
-# ------------------------------------------------------------
+# ============================================================
+# PREDICT BUTTON
+# ============================================================
 
 if st.sidebar.button(
-    "🔍  Predict Customer",
+    "🔍 Predict Customer",
     use_container_width=True
 ):
 
-    if not typed_customer.empty:
+    if input_customer.empty:
 
-        st.session_state.selected_customer_id = str(
-            customer_input
+        st.sidebar.error(
+            "Customer ID not found."
+        )
+
+    else:
+
+        st.session_state.selected_customer_id = (
+            customer_input.strip()
         )
 
         st.session_state.page = "🏠 Home"
 
         st.rerun()
 
-    else:
 
-        st.sidebar.error(
-            "Customer ID not found."
-        )
-
-
-# ------------------------------------------------------------
+# ============================================================
 # RESET BUTTON
-# ------------------------------------------------------------
+# ============================================================
 
 if st.sidebar.button(
-    "↻  Reset",
+    "↻ Reset",
     use_container_width=True
 ):
 
@@ -234,15 +515,22 @@ if st.sidebar.button(
 st.sidebar.markdown("---")
 
 
-# ------------------------------------------------------------
-# NAVIGATION
-# ------------------------------------------------------------
+# ============================================================
+# SIDEBAR NAVIGATION
+# ============================================================
+
+st.sidebar.markdown(
+    "### Navigation"
+)
+
 
 if st.sidebar.button(
     "🏠  Home",
     use_container_width=True
 ):
+
     st.session_state.page = "🏠 Home"
+
     st.rerun()
 
 
@@ -250,7 +538,9 @@ if st.sidebar.button(
     "📊  Dashboard",
     use_container_width=True
 ):
+
     st.session_state.page = "📊 Dashboard"
+
     st.rerun()
 
 
@@ -258,7 +548,9 @@ if st.sidebar.button(
     "👥  Customer Segments",
     use_container_width=True
 ):
+
     st.session_state.page = "👥 Customer Segments"
+
     st.rerun()
 
 
@@ -266,7 +558,9 @@ if st.sidebar.button(
     "👤  Customer Analysis",
     use_container_width=True
 ):
+
     st.session_state.page = "👤 Customer Analysis"
+
     st.rerun()
 
 
@@ -274,140 +568,81 @@ if st.sidebar.button(
     "💡  Marketing Suggestions",
     use_container_width=True
 ):
+
     st.session_state.page = "💡 Marketing Suggestions"
+
     st.rerun()
 
 
-# Current page
-page = st.session_state.page
+st.sidebar.markdown("---")
+
+
+if st.sidebar.button(
+    "ℹ️  About Project",
+    use_container_width=True
+):
+
+    st.session_state.page = "ℹ️ About Project"
+
+    st.rerun()
+
+
+if st.sidebar.button(
+    "👥  Team",
+    use_container_width=True
+):
+
+    st.session_state.page = "👥 Team"
+
+    st.rerun()
+
 
 # ============================================================
-# HOME PAGE - MODERN DASHBOARD STYLE
+# CURRENT PAGE
+# ============================================================
+
+page = st.session_state.page
+
+
+# ============================================================
+# HOME
 # ============================================================
 
 if page == "🏠 Home":
 
     # --------------------------------------------------------
-    # DESIGN
-    # --------------------------------------------------------
-
-    st.markdown("""
-    <style>
-
-    .main-title {
-        font-size: 36px;
-        font-weight: 800;
-        color: #1e293b;
-        margin-bottom: 5px;
-    }
-
-    .main-subtitle {
-        font-size: 17px;
-        color: #64748b;
-        margin-bottom: 25px;
-    }
-
-    .top-card {
-        padding: 20px;
-        border-radius: 15px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0px 4px 14px rgba(15,23,42,0.08);
-        min-height: 140px;
-    }
-
-    .card-title {
-        font-size: 14px;
-        color: #64748b;
-        margin-bottom: 10px;
-    }
-
-    .card-value {
-        font-size: 27px;
-        font-weight: 800;
-        color: #1e293b;
-    }
-
-    .section-box {
-        padding: 20px;
-        border-radius: 15px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0px 4px 14px rgba(15,23,42,0.06);
-        margin-bottom: 20px;
-    }
-
-    .marketing-card {
-        padding: 18px;
-        border-radius: 14px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        min-height: 150px;
-        box-shadow: 0px 3px 10px rgba(15,23,42,0.06);
-    }
-
-    .marketing-title {
-        font-size: 17px;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    .marketing-text {
-        font-size: 14px;
-        color: #475569;
-        line-height: 1.5;
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
-
-
-    # --------------------------------------------------------
-    # CUSTOMER SELECTION
-    # --------------------------------------------------------
-
-    customer_ids = sorted(
-        df["CustomerID"]
-        .dropna()
-        .unique()
-        .tolist()
-    )
-
-    selected_customer_id = st.sidebar.selectbox(
-        "Select Customer ID",
-        customer_ids
-    )
-
-    customer_data = df[
-        df["CustomerID"] == selected_customer_id
-    ]
-
-    customer = customer_data.iloc[0]
-
-
-    # --------------------------------------------------------
-    # PAGE HEADER
+    # HEADER
     # --------------------------------------------------------
 
     st.markdown(
-        '<div class="main-title">'
-        '👥 Customer Segmentation & Personalized Marketing Analytics'
-        '</div>',
+        """
+        <div style="
+            font-size:34px;
+            font-weight:800;
+            color:#172033;
+            margin-bottom:8px;
+        ">
+            Customer Segmentation & Personalized
+            Marketing Analytics
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
     st.markdown(
-        '<div class="main-subtitle">'
-        'Analyze customer behavior, understand segments, and generate '
-        'personalized marketing strategies.'
-        '</div>',
+        """
+        <div style="
+            font-size:16px;
+            color:#64748b;
+            margin-bottom:20px;
+        ">
+            Analyze customer behavior and generate
+            personalized marketing strategies.
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
-
-    # --------------------------------------------------------
-    # SUCCESS MESSAGE
-    # --------------------------------------------------------
 
     st.success(
         f"Customer {customer['CustomerID']} loaded successfully!"
@@ -415,27 +650,74 @@ if page == "🏠 Home":
 
 
     # --------------------------------------------------------
-    # TOP 3 CARDS
+    # MARKETING PRIORITY
+    # --------------------------------------------------------
+
+    priority_map = {
+        "Budget": "Low",
+        "Regular": "Medium",
+        "Premium": "High",
+        "VIP": "Very High"
+    }
+
+    priority = priority_map.get(
+        str(customer["Customer_Segment"]),
+        "Medium"
+    )
+
+
+    # --------------------------------------------------------
+    # TOP THREE CARDS
     # --------------------------------------------------------
 
     col1, col2, col3 = st.columns(3)
+
 
     with col1:
 
         st.markdown(
             f"""
-            <div class="top-card">
-                <div class="card-title">
-                    👥 Customer Segment
+            <div class="top-card top-card-blue">
+
+                <div class="card-small-title">
+                    👤 Customer Segment
                 </div>
 
-                <div class="card-value">
-                    {customer['Customer_Segment']}
+                <div class="card-value blue-value">
+                    {customer["Customer_Segment"]}
                 </div>
 
-                <div class="card-title">
-                    Current customer segment
+                <div style="
+                    color:#475569;
+                    margin-bottom:8px;
+                ">
+                    Spending Score
                 </div>
+
+                <div style="
+                    font-size:20px;
+                    font-weight:700;
+                    color:#2456d8;
+                ">
+                    {float(customer["SpendingScore"]):.0f} / 100
+                </div>
+
+                <div style="
+                    height:8px;
+                    background:#dbe7ff;
+                    border-radius:10px;
+                    margin-top:10px;
+                ">
+
+                    <div style="
+                        height:8px;
+                        width:{min(float(customer["SpendingScore"]),100)}%;
+                        background:#2456d8;
+                        border-radius:10px;
+                    "></div>
+
+                </div>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -446,18 +728,33 @@ if page == "🏠 Home":
 
         st.markdown(
             f"""
-            <div class="top-card">
-                <div class="card-title">
-                    📊 K-Means Cluster
+            <div class="top-card top-card-green">
+
+                <div class="card-small-title">
+                    👥 K-Means Cluster
                 </div>
 
-                <div class="card-value">
-                    {customer['KMeans_Cluster']}
+                <div class="card-value green-value">
+                    Cluster {customer["KMeans_Cluster"]}
                 </div>
 
-                <div class="card-title">
-                    Assigned customer cluster
+                <div style="
+                    color:#475569;
+                    margin-bottom:6px;
+                ">
+                    Description
                 </div>
+
+                <div style="
+                    color:#178555;
+                    font-size:15px;
+                    line-height:1.5;
+                ">
+                    {customer["Customer_Segment"]}
+                    customer based on
+                    purchasing behavior.
+                </div>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -468,47 +765,65 @@ if page == "🏠 Home":
 
         st.markdown(
             f"""
-            <div class="top-card">
-                <div class="card-title">
-                    🛍️ Spending Score
+            <div class="top-card top-card-yellow">
+
+                <div class="card-small-title">
+                    ⭐ Marketing Priority
                 </div>
 
-                <div class="card-value">
-                    {customer['SpendingScore']} / 100
+                <div class="card-value yellow-value">
+                    {priority}
                 </div>
 
-                <div class="card-title">
-                    Customer spending behavior
+                <div style="
+                    color:#475569;
+                    margin-bottom:6px;
+                ">
+                    Recommended Strategy
                 </div>
+
+                <div style="
+                    color:#5f4b22;
+                    font-size:14px;
+                    line-height:1.5;
+                ">
+                    {customer["Marketing_Suggestion"]}
+                </div>
+
             </div>
             """,
             unsafe_allow_html=True
         )
 
 
-    st.divider()
+    st.markdown("<br>", unsafe_allow_html=True)
 
 
     # --------------------------------------------------------
-    # CUSTOMER PROFILE + VISUALIZATION
+    # PROFILE + VISUALIZATION
     # --------------------------------------------------------
 
-    col1, col2 = st.columns([1, 1.6])
+    col1, col2 = st.columns(
+        [1, 1.65]
+    )
 
 
     # --------------------------------------------------------
-    # CUSTOMER PROFILE
+    # PROFILE
     # --------------------------------------------------------
 
     with col1:
 
-        st.subheader("👤 Customer Profile")
+        st.subheader(
+            "👤 Customer Profile"
+        )
 
-        profile = pd.DataFrame({
+        profile_df = pd.DataFrame({
+
             "Field": [
                 "Customer ID",
                 "Age",
-                "Annual Income",
+                "Income",
                 "Purchase History",
                 "Spending Score",
                 "Segment",
@@ -524,61 +839,89 @@ if page == "🏠 Home":
                 customer["Customer_Segment"],
                 customer["KMeans_Cluster"]
             ]
+
         })
 
+
         st.dataframe(
-            profile,
+            profile_df,
             use_container_width=True,
             hide_index=True
         )
 
 
     # --------------------------------------------------------
-    # CUSTOMER VISUALIZATION
+    # VISUALIZATION
     # --------------------------------------------------------
 
     with col2:
 
-        st.subheader("📈 Customer Visualization")
+        st.subheader(
+            "📊 Customer Visualization"
+        )
+
 
         fig, ax = plt.subplots(
             figsize=(8, 5)
         )
 
-        segments = df[
-            "Customer_Segment"
-        ].dropna().unique()
+
+        clusters = (
+            df["KMeans_Cluster"]
+            .dropna()
+            .astype(str)
+            .unique()
+        )
 
 
-        for segment in segments:
+        chart_colors = [
+            "#ef4444",
+            "#2563eb",
+            "#16a34a",
+            "#9333ea",
+            "#f59e0b"
+        ]
 
-            segment_data = df[
-                df["Customer_Segment"] == segment
+
+        for index, cluster in enumerate(
+            clusters
+        ):
+
+            cluster_data = df[
+                df["KMeans_Cluster"]
+                .astype(str)
+                == cluster
             ]
 
+
             ax.scatter(
-                segment_data["AnnualIncome"],
-                segment_data["SpendingScore"],
-                label=segment,
-                alpha=0.65
+                cluster_data["AnnualIncome"],
+                cluster_data["SpendingScore"],
+                label=f"Cluster {cluster}",
+                color=chart_colors[
+                    index % len(chart_colors)
+                ],
+                alpha=0.65,
+                s=40
             )
 
 
-        # Highlight selected customer
+        # Selected customer
 
         ax.scatter(
             customer["AnnualIncome"],
             customer["SpendingScore"],
             marker="*",
-            s=300,
-            edgecolors="black",
+            s=280,
+            color="#111827",
+            edgecolors="white",
             linewidths=1.5,
-            label="Selected Customer"
+            label=f"Customer ({customer['CustomerID']})"
         )
 
 
         ax.set_title(
-            "Annual Income vs Spending Score"
+            "Income vs Spending Score"
         )
 
         ax.set_xlabel(
@@ -589,7 +932,238 @@ if page == "🏠 Home":
             "Spending Score"
         )
 
-        ax.legend()
+        ax.grid(
+            True,
+            alpha=0.20
+        )
+
+        ax.legend(
+            loc="upper left",
+            bbox_to_anchor=(1.02, 1)
+        )
+
+
+        plt.tight_layout()
+
+        st.pyplot(fig)
+
+        plt.close(fig)
+
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+
+    # --------------------------------------------------------
+    # MARKETING SUGGESTIONS
+    # --------------------------------------------------------
+
+    st.subheader(
+        "💡 Personalized Marketing Suggestions"
+    )
+
+
+    col1, col2, col3, col4 = st.columns(4)
+
+
+    strategy_data = [
+
+        (
+            "🎁",
+            "Personalized Offers",
+            "Use the customer's segment and spending behavior "
+            "to send targeted offers."
+        ),
+
+        (
+            "🏷️",
+            "Seasonal Discounts",
+            "Provide suitable discounts and seasonal deals "
+            "based on the customer segment."
+        ),
+
+        (
+            "⭐",
+            "Loyalty Rewards",
+            "Encourage repeat purchases using loyalty points "
+            "and rewards."
+        ),
+
+        (
+            "✉️",
+            "Personalized Campaigns",
+            "Send relevant products and promotions through "
+            "personalized marketing campaigns."
+        )
+    ]
+
+
+    for column, item in zip(
+        [col1, col2, col3, col4],
+        strategy_data
+    ):
+
+        icon, title, text = item
+
+        with column:
+
+            st.markdown(
+                f"""
+                <div class="marketing-card">
+
+                    <div class="marketing-title">
+                        {icon} {title}
+                    </div>
+
+                    <div class="marketing-text">
+                        {text}
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+
+    st.markdown(
+        """
+        <div style="
+            text-align:center;
+            color:#64748b;
+            font-size:13px;
+            padding:15px;
+        ">
+            © Customer Segmentation Platform |
+            Built with Python, Pandas, Matplotlib & Streamlit
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# ============================================================
+# DASHBOARD
+# ============================================================
+
+elif page == "📊 Dashboard":
+
+    st.title(
+        "📊 Customer Segmentation Dashboard"
+    )
+
+    st.write(
+        "Overall analysis of customer data."
+    )
+
+    st.divider()
+
+
+    col1, col2, col3, col4 = st.columns(4)
+
+
+    with col1:
+
+        st.metric(
+            "👥 Total Customers",
+            len(df)
+        )
+
+
+    with col2:
+
+        st.metric(
+            "💰 Average Income",
+            f"₹{df['AnnualIncome'].mean():,.0f}"
+        )
+
+
+    with col3:
+
+        st.metric(
+            "🛍️ Average Spending",
+            f"{df['SpendingScore'].mean():.2f}"
+        )
+
+
+    with col4:
+
+        st.metric(
+            "📌 Segments",
+            df["Customer_Segment"].nunique()
+        )
+
+
+    st.divider()
+
+
+    col1, col2 = st.columns(2)
+
+
+    with col1:
+
+        st.subheader(
+            "👥 Customer Distribution"
+        )
+
+        counts = (
+            df["Customer_Segment"]
+            .value_counts()
+        )
+
+        fig, ax = plt.subplots(
+            figsize=(7, 5)
+        )
+
+        counts.plot(
+            kind="bar",
+            ax=ax
+        )
+
+        ax.set_xlabel(
+            "Customer Segment"
+        )
+
+        ax.set_ylabel(
+            "Customers"
+        )
+
+        ax.tick_params(
+            axis="x",
+            rotation=0
+        )
+
+        plt.tight_layout()
+
+        st.pyplot(fig)
+
+        plt.close(fig)
+
+
+    with col2:
+
+        st.subheader(
+            "💰 Income vs Spending"
+        )
+
+        fig, ax = plt.subplots(
+            figsize=(7, 5)
+        )
+
+        ax.scatter(
+            df["AnnualIncome"],
+            df["SpendingScore"],
+            alpha=0.65
+        )
+
+        ax.set_xlabel(
+            "Annual Income"
+        )
+
+        ax.set_ylabel(
+            "Spending Score"
+        )
 
         ax.grid(
             True,
@@ -606,325 +1180,25 @@ if page == "🏠 Home":
     st.divider()
 
 
-    # --------------------------------------------------------
-    # MARKETING SUGGESTIONS
-    # --------------------------------------------------------
-
     st.subheader(
-        "💡 Personalized Marketing Suggestions"
-    )
-
-    st.write(
-        "Marketing strategies available for each customer segment."
+        "📋 Segment Summary"
     )
 
 
-    budget = df[
-        df["Customer_Segment"] == "Budget"
-    ]
-
-    regular = df[
-        df["Customer_Segment"] == "Regular"
-    ]
-
-    premium = df[
-        df["Customer_Segment"] == "Premium"
-    ]
-
-    vip = df[
-        df["Customer_Segment"] == "VIP"
-    ]
-
-
-    col1, col2, col3, col4 = st.columns(4)
-
-
-    with col1:
-
-        st.markdown(
-            f"""
-            <div class="marketing-card">
-                <div class="marketing-title">
-                    💰 Budget
-                </div>
-
-                <div class="marketing-text">
-                    {
-                        budget["Marketing_Suggestion"].iloc[0]
-                        if not budget.empty
-                        else "No suggestion available."
-                    }
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
+    summary = (
+        df.groupby("Customer_Segment")
+        .agg(
+            Customers=("CustomerID", "count"),
+            Average_Income=("AnnualIncome", "mean"),
+            Average_Spending=("SpendingScore", "mean"),
+            Average_Purchases=("PurchaseHistory", "mean")
         )
-
-
-    with col2:
-
-        st.markdown(
-            f"""
-            <div class="marketing-card">
-                <div class="marketing-title">
-                    🛍️ Regular
-                </div>
-
-                <div class="marketing-text">
-                    {
-                        regular["Marketing_Suggestion"].iloc[0]
-                        if not regular.empty
-                        else "No suggestion available."
-                    }
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    with col3:
-
-        st.markdown(
-            f"""
-            <div class="marketing-card">
-                <div class="marketing-title">
-                    💎 Premium
-                </div>
-
-                <div class="marketing-text">
-                    {
-                        premium["Marketing_Suggestion"].iloc[0]
-                        if not premium.empty
-                        else "No suggestion available."
-                    }
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    with col4:
-
-        st.markdown(
-            f"""
-            <div class="marketing-card">
-                <div class="marketing-title">
-                    👑 VIP
-                </div>
-
-                <div class="marketing-text">
-                    {
-                        vip["Marketing_Suggestion"].iloc[0]
-                        if not vip.empty
-                        else "No suggestion available."
-                    }
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    # --------------------------------------------------------
-    # FOOTER
-    # --------------------------------------------------------
-
-    st.markdown(
-        """
-        <br>
-
-        <div style="
-            text-align:center;
-            color:#64748b;
-            font-size:13px;
-            padding:20px;
-        ">
-            Customer Segmentation & Personalized Marketing Platform
-            <br>
-            Built with Python, Pandas, Matplotlib and Streamlit
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    # ========================================================
-    # KPI CARDS
-    # ========================================================
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-
-        st.metric(
-            "Total Customers",
-            len(df)
-        )
-
-    with col2:
-
-        st.metric(
-            "Average Income",
-            f"{df['AnnualIncome'].mean():,.0f}"
-        )
-
-    with col3:
-
-        st.metric(
-            "Average Spending Score",
-            f"{df['SpendingScore'].mean():.2f}"
-        )
-
-    with col4:
-
-        st.metric(
-            "Number of Segments",
-            df["Customer_Segment"].nunique()
-        )
-
-    st.divider()
-
-    # ========================================================
-    # SEGMENT DISTRIBUTION
-    # ========================================================
-
-    st.subheader("👥 Customer Segment Distribution")
-
-    segment_counts = df["Customer_Segment"].value_counts()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        fig, ax = plt.subplots(figsize=(7, 5))
-
-        segment_counts.plot(
-            kind="bar",
-            ax=ax
-        )
-
-        ax.set_title("Customers by Segment")
-        ax.set_xlabel("Customer Segment")
-        ax.set_ylabel("Number of Customers")
-
-        plt.xticks(rotation=0)
-
-        st.pyplot(fig)
-
-        plt.close(fig)
-
-    with col2:
-
-        fig, ax = plt.subplots(figsize=(7, 5))
-
-        segment_counts.plot(
-            kind="pie",
-            autopct="%1.1f%%",
-            ax=ax
-        )
-
-        ax.set_title("Segment Distribution")
-        ax.set_ylabel("")
-
-        st.pyplot(fig)
-
-        plt.close(fig)
-
-    st.divider()
-
-    # ========================================================
-    # INCOME VS SPENDING
-    # ========================================================
-
-    st.subheader("💰 Annual Income vs Spending Score")
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-
-    ax.scatter(
-        df["AnnualIncome"],
-        df["SpendingScore"]
+        .reset_index()
     )
 
-    ax.set_title("Income vs Spending Score")
-    ax.set_xlabel("Annual Income")
-    ax.set_ylabel("Spending Score")
-
-    st.pyplot(fig)
-
-    plt.close(fig)
-
-    st.divider()
-
-    # ========================================================
-    # AVERAGE INCOME BY SEGMENT
-    # ========================================================
-
-    st.subheader("📈 Average Income by Segment")
-
-    avg_income = (
-        df.groupby("Customer_Segment")["AnnualIncome"]
-        .mean()
-        .sort_values()
-    )
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-
-    avg_income.plot(
-        kind="bar",
-        ax=ax
-    )
-
-    ax.set_title("Average Annual Income by Segment")
-    ax.set_xlabel("Customer Segment")
-    ax.set_ylabel("Average Annual Income")
-
-    plt.xticks(rotation=0)
-
-    st.pyplot(fig)
-
-    plt.close(fig)
-
-    st.divider()
-
-    # ========================================================
-    # AVERAGE SPENDING BY SEGMENT
-    # ========================================================
-
-    st.subheader("🛍️ Average Spending Score by Segment")
-
-    avg_spending = (
-        df.groupby("Customer_Segment")["SpendingScore"]
-        .mean()
-        .sort_values()
-    )
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-
-    avg_spending.plot(
-        kind="bar",
-        ax=ax
-    )
-
-    ax.set_title("Average Spending Score by Segment")
-    ax.set_xlabel("Customer Segment")
-    ax.set_ylabel("Average Spending Score")
-
-    plt.xticks(rotation=0)
-
-    st.pyplot(fig)
-
-    plt.close(fig)
-
-    st.divider()
-
-    # ========================================================
-    # COMPLETE DATASET
-    # ========================================================
-
-    st.subheader("📋 Complete Customer Dataset")
 
     st.dataframe(
-        df,
+        summary.round(2),
         use_container_width=True,
         hide_index=True
     )
@@ -936,183 +1210,65 @@ if page == "🏠 Home":
 
 elif page == "👥 Customer Segments":
 
-    st.title("👥 Customer Segmentation")
+    st.title(
+        "👥 Customer Segments"
+    )
 
     st.write(
-        "Customers are grouped into four segments based on their purchasing behavior."
+        "Customers grouped according to their customer segment."
     )
 
-    # ========================================================
-    # CSS
-    # ========================================================
-
-    st.markdown(
-        """
-        <style>
-
-        .segment-card {
-            padding: 22px;
-            border-radius: 12px;
-            border: 1px solid #d9d9d9;
-            background-color: black;
-            text-align: center;
-            min-height: 145px;
-            box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
-        }
-
-        .segment-title {
-            font-size: 21px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .segment-count {
-            font-size: 30px;
-            font-weight: 700;
-        }
-
-        .segment-label {
-            font-size: 14px;
-            color: #666;
-        }
-
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    st.divider()
 
 
-    # ========================================================
-    # CREATE SEGMENTS
-    # ========================================================
-
-    budget = df[
-        df["Customer_Segment"] == "Budget"
+    segments = [
+        ("💰 Budget", "Budget"),
+        ("🛍️ Regular", "Regular"),
+        ("💎 Premium", "Premium"),
+        ("👑 VIP", "VIP")
     ]
 
-    regular = df[
-        df["Customer_Segment"] == "Regular"
-    ]
-
-    premium = df[
-        df["Customer_Segment"] == "Premium"
-    ]
-
-    vip = df[
-        df["Customer_Segment"] == "VIP"
-    ]
-
-
-    # ========================================================
-    # TOP SEGMENT CARDS
-    # ========================================================
 
     col1, col2, col3, col4 = st.columns(4)
 
-    with col1:
 
-        st.markdown(
-            f"""
-            <div class="segment-card">
-                <div class="segment-title">💰 Budget</div>
-                <div class="segment-count">{len(budget)}</div>
-                <div class="segment-label">Customers</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    for column, item in zip(
+        [col1, col2, col3, col4],
+        segments
+    ):
 
-    with col2:
+        icon_name, segment_name = item
 
-        st.markdown(
-            f"""
-            <div class="segment-card">
-                <div class="segment-title">🛍️ Regular</div>
-                <div class="segment-count">{len(regular)}</div>
-                <div class="segment-label">Customers</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        segment_data = df[
+            df["Customer_Segment"] == segment_name
+        ]
 
-    with col3:
 
-        st.markdown(
-            f"""
-            <div class="segment-card">
-                <div class="segment-title">💎 Premium</div>
-                <div class="segment-count">{len(premium)}</div>
-                <div class="segment-label">Customers</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        with column:
 
-    with col4:
-
-        st.markdown(
-            f"""
-            <div class="segment-card">
-                <div class="segment-title">👑 VIP</div>
-                <div class="segment-count">{len(vip)}</div>
-                <div class="segment-label">Customers</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+            st.metric(
+                icon_name,
+                len(segment_data)
+            )
 
 
     st.divider()
 
 
-    # ========================================================
-    # FUNCTION TO DISPLAY SEGMENT
-    # ========================================================
-
-    def display_segment(segment_name, segment_data):
-
-        st.subheader(
-            f"Customers - {segment_name}"
-        )
-
-        st.dataframe(
-            segment_data[
-                [
-                    "CustomerID",
-                    "Age",
-                    "AnnualIncome",
-                    "PurchaseHistory",
-                    "SpendingScore"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
-
-        st.markdown("**💡 Marketing Strategy**")
-
-        if not segment_data.empty:
-
-            suggestion = (
-                segment_data["Marketing_Suggestion"]
-                .dropna()
-                .unique()
-            )
-
-            for item in suggestion:
-
-                st.info(item)
-
-
-    # ========================================================
-    # BUDGET + REGULAR
-    # ========================================================
+    # Budget + Regular
 
     col1, col2 = st.columns(2)
 
+
     with col1:
 
-        st.markdown("### 💰 Budget Customers")
+        st.subheader(
+            "💰 Budget Customers"
+        )
+
+        budget = df[
+            df["Customer_Segment"] == "Budget"
+        ]
 
         st.dataframe(
             budget[
@@ -1128,18 +1284,16 @@ elif page == "👥 Customer Segments":
             hide_index=True
         )
 
-        st.markdown("**💡 Marketing Strategy**")
-
-        if not budget.empty:
-
-            st.info(
-                budget["Marketing_Suggestion"].iloc[0]
-            )
-
 
     with col2:
 
-        st.markdown("### 🛍️ Regular Customers")
+        st.subheader(
+            "🛍️ Regular Customers"
+        )
+
+        regular = df[
+            df["Customer_Segment"] == "Regular"
+        ]
 
         st.dataframe(
             regular[
@@ -1155,27 +1309,24 @@ elif page == "👥 Customer Segments":
             hide_index=True
         )
 
-        st.markdown("**💡 Marketing Strategy**")
-
-        if not regular.empty:
-
-            st.info(
-                regular["Marketing_Suggestion"].iloc[0]
-            )
-
 
     st.divider()
 
 
-    # ========================================================
-    # PREMIUM + VIP
-    # ========================================================
+    # Premium + VIP
 
     col1, col2 = st.columns(2)
 
+
     with col1:
 
-        st.markdown("### 💎 Premium Customers")
+        st.subheader(
+            "💎 Premium Customers"
+        )
+
+        premium = df[
+            df["Customer_Segment"] == "Premium"
+        ]
 
         st.dataframe(
             premium[
@@ -1191,18 +1342,16 @@ elif page == "👥 Customer Segments":
             hide_index=True
         )
 
-        st.markdown("**💡 Marketing Strategy**")
-
-        if not premium.empty:
-
-            st.info(
-                premium["Marketing_Suggestion"].iloc[0]
-            )
-
 
     with col2:
 
-        st.markdown("### 👑 VIP Customers")
+        st.subheader(
+            "👑 VIP Customers"
+        )
+
+        vip = df[
+            df["Customer_Segment"] == "VIP"
+        ]
 
         st.dataframe(
             vip[
@@ -1218,14 +1367,6 @@ elif page == "👥 Customer Segments":
             hide_index=True
         )
 
-        st.markdown("**💡 Marketing Strategy**")
-
-        if not vip.empty:
-
-            st.info(
-                vip["Marketing_Suggestion"].iloc[0]
-            )
-
 
 # ============================================================
 # CUSTOMER ANALYSIS
@@ -1233,133 +1374,239 @@ elif page == "👥 Customer Segments":
 
 elif page == "👤 Customer Analysis":
 
-    st.title("👤 Customer Analysis")
+    st.title(
+        "👤 Customer Analysis"
+    )
 
     st.write(
-        "Select a Customer ID to view complete customer details."
+        "Complete information for the selected customer."
     )
 
-    customer_ids = sorted(
-        df["CustomerID"].dropna().unique().tolist()
+    st.divider()
+
+
+    st.success(
+        f"Customer loaded: {customer['CustomerID']}"
     )
 
-    selected_customer_id = st.selectbox(
-        "Select Customer ID",
-        customer_ids
-    )
 
-    customer_data = df[
-        df["CustomerID"] == selected_customer_id
-    ]
+    col1, col2 = st.columns(2)
 
-    if not customer_data.empty:
 
-        customer = customer_data.iloc[0]
+    with col1:
 
-        st.success(
-            f"Customer found: {customer['CustomerID']}"
+        st.subheader(
+            "📋 Customer Details"
         )
 
-        st.subheader("📋 Complete Customer Details")
+        st.write(
+            "**Customer ID:**",
+            customer["CustomerID"]
+        )
 
-        col1, col2 = st.columns(2)
+        st.write(
+            "**Age:**",
+            int(customer["Age"])
+        )
 
-        with col1:
+        st.write(
+            "**Annual Income:**",
+            f"₹{float(customer['AnnualIncome']):,.2f}"
+        )
 
-            st.write(
-                "**Customer ID:**",
-                customer["CustomerID"]
-            )
+        st.write(
+            "**Purchase History:**",
+            int(customer["PurchaseHistory"])
+        )
 
-            st.write(
-                "**Age:**",
-                int(customer["Age"])
-            )
+        st.write(
+            "**Spending Score:**",
+            float(customer["SpendingScore"])
+        )
 
-            st.write(
-                "**Annual Income:**",
-                f"{float(customer['AnnualIncome']):,.2f}"
-            )
 
-            st.write(
-                "**Purchase History:**",
-                int(customer["PurchaseHistory"])
-            )
+    with col2:
 
-            st.write(
-                "**Spending Score:**",
-                float(customer["SpendingScore"])
-            )
+        st.subheader(
+            "📊 Customer Classification"
+        )
 
-        with col2:
+        st.write(
+            "**Cluster:**",
+            customer["Cluster"]
+        )
 
-            st.write(
-                "**Cluster:**",
-                customer["Cluster"]
-            )
+        st.write(
+            "**K-Means Cluster:**",
+            customer["KMeans_Cluster"]
+        )
 
-            st.write(
-                "**K-Means Cluster:**",
-                customer["KMeans_Cluster"]
-            )
-
-            st.write(
-                "**Customer Segment:**",
-                customer["Customer_Segment"]
-            )
+        st.write(
+            "**Customer Segment:**",
+            customer["Customer_Segment"]
+        )
 
         st.divider()
 
-        st.subheader("💡 Marketing Suggestion")
+        st.subheader(
+            "💡 Marketing Suggestion"
+        )
 
         st.info(
             customer["Marketing_Suggestion"]
         )
+
+
 # ============================================================
 # MARKETING SUGGESTIONS
 # ============================================================
 
 elif page == "💡 Marketing Suggestions":
 
-    st.title("💡 Marketing Suggestions")
+    st.title(
+        "💡 Marketing Suggestions"
+    )
 
     st.write(
-        "Recommended marketing strategies for each customer segment."
+        "Segment-wise marketing strategies."
     )
 
     st.divider()
 
-    segments = [
-        "Budget",
-        "Regular",
-        "Premium",
-        "VIP"
+
+    strategies = [
+        ("💰 Budget", "Budget"),
+        ("🛍️ Regular", "Regular"),
+        ("💎 Premium", "Premium"),
+        ("👑 VIP", "VIP")
     ]
 
-    for segment in segments:
+
+    col1, col2 = st.columns(2)
+
+
+    for index, item in enumerate(strategies):
+
+        icon_name, segment_name = item
 
         segment_data = df[
-            df["Customer_Segment"] == segment
+            df["Customer_Segment"] == segment_name
         ]
 
-        if not segment_data.empty:
+
+        if segment_data.empty:
+            continue
+
+
+        suggestion = (
+            segment_data["Marketing_Suggestion"]
+            .dropna()
+            .iloc[0]
+        )
+
+
+        target_col = col1 if index % 2 == 0 else col2
+
+
+        with target_col:
 
             st.subheader(
-                f"👥 {segment} Customers"
+                f"{icon_name} Customers"
             )
 
-            st.write(
-                f"Total Customers: **{len(segment_data)}**"
+            st.metric(
+                "Customers",
+                len(segment_data)
             )
 
-            suggestions = (
-                segment_data["Marketing_Suggestion"]
-                .dropna()
-                .unique()
+            st.info(
+                suggestion
             )
 
-            for suggestion in suggestions:
+            st.markdown("---")
 
-                st.info(suggestion)
 
-            st.divider()
+# ============================================================
+# ABOUT PROJECT
+# ============================================================
+
+elif page == "ℹ️ About Project":
+
+    st.title(
+        "ℹ️ About Project"
+    )
+
+    st.subheader(
+        "Customer Segmentation & Personalized Marketing Analytics"
+    )
+
+    st.write(
+        """
+        This project analyzes customer information and divides customers
+        into meaningful segments based on purchasing behavior.
+        The system helps understand customer characteristics and provides
+        personalized marketing suggestions.
+        """
+    )
+
+    st.divider()
+
+
+    st.subheader(
+        "🎯 Objectives"
+    )
+
+    st.write(
+        """
+        • Analyze customer purchasing behavior
+
+        • Identify customer segments
+
+        • Understand income and spending patterns
+
+        • Support personalized marketing decisions
+
+        • Present customer insights through an interactive dashboard
+        """
+    )
+
+
+    st.subheader(
+        "🛠️ Technologies Used"
+    )
+
+    st.write(
+        """
+        Python  
+        Pandas  
+        Matplotlib  
+        Streamlit  
+        Machine Learning / K-Means Segmentation
+        """
+    )
+
+
+# ============================================================
+# TEAM
+# ============================================================
+
+elif page == "👥 Team":
+
+    st.title(
+        "👥 Team"
+    )
+
+    st.subheader(
+        "Customer Segmentation Project"
+    )
+
+    st.write(
+        "Project developed as an academic data analytics project."
+    )
+
+    st.divider()
+
+
+    st.info(
+        "Add your team member names, college name and guide details here."
+    )
