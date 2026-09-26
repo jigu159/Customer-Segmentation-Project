@@ -34,24 +34,252 @@ try:
 except Exception as e:
     st.error(f"Unable to load dataset: {e}")
     st.stop()
-
 # ============================================================
-# SIDEBAR NAVIGATION
+# CUSTOM SIDEBAR
 # ============================================================
 
-st.sidebar.title("📌 Navigation")
+# Default page
+if "page" not in st.session_state:
+    st.session_state.page = "🏠 Home"
 
-page = st.sidebar.radio(
-    "Go to",
-    [
-        "🏠 Home",
-        "📊 Dashboard",
-        "👥 Customer Segments",
-        "👤 Customer Analysis",
-        "💡 Marketing Suggestions"
-    ]
+# Selected customer
+if "selected_customer_id" not in st.session_state:
+    st.session_state.selected_customer_id = str(
+        df["CustomerID"].iloc[0]
+    )
+
+
+# ------------------------------------------------------------
+# SIDEBAR STYLE
+# ------------------------------------------------------------
+
+st.markdown("""
+<style>
+
+[data-testid="stSidebar"] {
+    background: #172554;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1.5rem;
+}
+
+.sidebar-brand {
+    text-align: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.25);
+    margin-bottom: 20px;
+}
+
+.sidebar-brand-icon {
+    font-size: 38px;
+}
+
+.sidebar-brand-title {
+    color: white;
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.sidebar-brand-subtitle {
+    color: #cbd5e1;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.sidebar-section-title {
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# ------------------------------------------------------------
+# APP BRANDING
+# ------------------------------------------------------------
+
+st.sidebar.markdown("""
+<div class="sidebar-brand">
+
+    <div class="sidebar-brand-icon">👥</div>
+
+    <div class="sidebar-brand-title">
+        Customer Segmentation<br>
+        Platform
+    </div>
+
+    <div class="sidebar-brand-subtitle">
+        Personalized Marketing Analytics
+    </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+# ------------------------------------------------------------
+# CUSTOMER DETAILS
+# ------------------------------------------------------------
+
+st.sidebar.markdown(
+    '<div class="sidebar-section-title">'
+    'Enter Customer Details'
+    '</div>',
+    unsafe_allow_html=True
 )
 
+
+customer_input = st.sidebar.text_input(
+    "Customer ID",
+    value=str(st.session_state.selected_customer_id)
+)
+
+
+# Find customer
+typed_customer = df[
+    df["CustomerID"].astype(str) == str(customer_input).strip()
+]
+
+
+if not typed_customer.empty:
+
+    sidebar_customer = typed_customer.iloc[0]
+
+    sidebar_age = sidebar_customer["Age"]
+    sidebar_income = sidebar_customer["AnnualIncome"]
+    sidebar_purchase = sidebar_customer["PurchaseHistory"]
+    sidebar_spending = sidebar_customer["SpendingScore"]
+
+else:
+
+    sidebar_age = ""
+    sidebar_income = ""
+    sidebar_purchase = ""
+    sidebar_spending = ""
+
+
+st.sidebar.number_input(
+    "Age",
+    value=int(sidebar_age) if sidebar_age != "" else 0,
+    disabled=True
+)
+
+st.sidebar.number_input(
+    "Income (₹)",
+    value=float(sidebar_income) if sidebar_income != "" else 0.0,
+    disabled=True
+)
+
+st.sidebar.number_input(
+    "Purchase History",
+    value=int(sidebar_purchase) if sidebar_purchase != "" else 0,
+    disabled=True
+)
+
+st.sidebar.number_input(
+    "Spending Score (1 - 100)",
+    value=float(sidebar_spending) if sidebar_spending != "" else 0.0,
+    disabled=True
+)
+
+
+# ------------------------------------------------------------
+# PREDICT / LOAD CUSTOMER BUTTON
+# ------------------------------------------------------------
+
+if st.sidebar.button(
+    "🔍  Predict Customer",
+    use_container_width=True
+):
+
+    if not typed_customer.empty:
+
+        st.session_state.selected_customer_id = str(
+            customer_input
+        )
+
+        st.session_state.page = "🏠 Home"
+
+        st.rerun()
+
+    else:
+
+        st.sidebar.error(
+            "Customer ID not found."
+        )
+
+
+# ------------------------------------------------------------
+# RESET BUTTON
+# ------------------------------------------------------------
+
+if st.sidebar.button(
+    "↻  Reset",
+    use_container_width=True
+):
+
+    st.session_state.selected_customer_id = str(
+        df["CustomerID"].iloc[0]
+    )
+
+    st.session_state.page = "🏠 Home"
+
+    st.rerun()
+
+
+st.sidebar.markdown("---")
+
+
+# ------------------------------------------------------------
+# NAVIGATION
+# ------------------------------------------------------------
+
+if st.sidebar.button(
+    "🏠  Home",
+    use_container_width=True
+):
+    st.session_state.page = "🏠 Home"
+    st.rerun()
+
+
+if st.sidebar.button(
+    "📊  Dashboard",
+    use_container_width=True
+):
+    st.session_state.page = "📊 Dashboard"
+    st.rerun()
+
+
+if st.sidebar.button(
+    "👥  Customer Segments",
+    use_container_width=True
+):
+    st.session_state.page = "👥 Customer Segments"
+    st.rerun()
+
+
+if st.sidebar.button(
+    "👤  Customer Analysis",
+    use_container_width=True
+):
+    st.session_state.page = "👤 Customer Analysis"
+    st.rerun()
+
+
+if st.sidebar.button(
+    "💡  Marketing Suggestions",
+    use_container_width=True
+):
+    st.session_state.page = "💡 Marketing Suggestions"
+    st.rerun()
+
+
+# Current page
+page = st.session_state.page
 
 # ============================================================
 # HOME PAGE - MODERN DASHBOARD STYLE
