@@ -54,100 +54,472 @@ page = st.sidebar.radio(
 
 
 # ============================================================
-# HOME PAGE
+# HOME PAGE - MODERN DASHBOARD STYLE
 # ============================================================
 
 if page == "🏠 Home":
 
-    st.title("👥 Customer Segmentation & Marketing")
+    # --------------------------------------------------------
+    # DESIGN
+    # --------------------------------------------------------
 
-    st.subheader(
-        "Customer Segmentation and Personalized Marketing Analysis Platform"
+    st.markdown("""
+    <style>
+
+    .main-title {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 5px;
+    }
+
+    .main-subtitle {
+        font-size: 17px;
+        color: #64748b;
+        margin-bottom: 25px;
+    }
+
+    .top-card {
+        padding: 20px;
+        border-radius: 15px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0px 4px 14px rgba(15,23,42,0.08);
+        min-height: 140px;
+    }
+
+    .card-title {
+        font-size: 14px;
+        color: #64748b;
+        margin-bottom: 10px;
+    }
+
+    .card-value {
+        font-size: 27px;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .section-box {
+        padding: 20px;
+        border-radius: 15px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0px 4px 14px rgba(15,23,42,0.06);
+        margin-bottom: 20px;
+    }
+
+    .marketing-card {
+        padding: 18px;
+        border-radius: 14px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        min-height: 150px;
+        box-shadow: 0px 3px 10px rgba(15,23,42,0.06);
+    }
+
+    .marketing-title {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .marketing-text {
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
+
+
+    # --------------------------------------------------------
+    # CUSTOMER SELECTION
+    # --------------------------------------------------------
+
+    customer_ids = sorted(
+        df["CustomerID"]
+        .dropna()
+        .unique()
+        .tolist()
     )
 
-    st.write(
-        """
-        This project analyzes customer information and divides customers
-        into different segments based on their purchasing behavior.
-        """
+    selected_customer_id = st.sidebar.selectbox(
+        "Select Customer ID",
+        customer_ids
     )
 
-    st.divider()
+    customer_data = df[
+        df["CustomerID"] == selected_customer_id
+    ]
 
-    # Project overview
+    customer = customer_data.iloc[0]
+
+
+    # --------------------------------------------------------
+    # PAGE HEADER
+    # --------------------------------------------------------
+
+    st.markdown(
+        '<div class="main-title">'
+        '👥 Customer Segmentation & Personalized Marketing Analytics'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="main-subtitle">'
+        'Analyze customer behavior, understand segments, and generate '
+        'personalized marketing strategies.'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    # --------------------------------------------------------
+    # SUCCESS MESSAGE
+    # --------------------------------------------------------
+
+    st.success(
+        f"Customer {customer['CustomerID']} loaded successfully!"
+    )
+
+
+    # --------------------------------------------------------
+    # TOP 3 CARDS
+    # --------------------------------------------------------
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
 
-        st.metric(
-            "Total Customers",
-            len(df)
+        st.markdown(
+            f"""
+            <div class="top-card">
+                <div class="card-title">
+                    👥 Customer Segment
+                </div>
+
+                <div class="card-value">
+                    {customer['Customer_Segment']}
+                </div>
+
+                <div class="card-title">
+                    Current customer segment
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
+
 
     with col2:
 
-        st.metric(
-            "Customer Segments",
-            df["Customer_Segment"].nunique()
+        st.markdown(
+            f"""
+            <div class="top-card">
+                <div class="card-title">
+                    📊 K-Means Cluster
+                </div>
+
+                <div class="card-value">
+                    {customer['KMeans_Cluster']}
+                </div>
+
+                <div class="card-title">
+                    Assigned customer cluster
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
+
 
     with col3:
 
-        st.metric(
-            "Average Spending Score",
-            f"{df['SpendingScore'].mean():.2f}"
+        st.markdown(
+            f"""
+            <div class="top-card">
+                <div class="card-title">
+                    🛍️ Spending Score
+                </div>
+
+                <div class="card-value">
+                    {customer['SpendingScore']} / 100
+                </div>
+
+                <div class="card-title">
+                    Customer spending behavior
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
+
 
     st.divider()
 
-    st.subheader("🎯 Project Objectives")
 
-    st.write(
-        """
-        • Analyze customer purchasing behavior
+    # --------------------------------------------------------
+    # CUSTOMER PROFILE + VISUALIZATION
+    # --------------------------------------------------------
 
-        • Divide customers into meaningful customer segments
+    col1, col2 = st.columns([1, 1.6])
 
-        • Understand spending patterns
 
-        • Identify high-value customers
+    # --------------------------------------------------------
+    # CUSTOMER PROFILE
+    # --------------------------------------------------------
 
-        • Provide personalized marketing suggestions
-        """
+    with col1:
+
+        st.subheader("👤 Customer Profile")
+
+        profile = pd.DataFrame({
+            "Field": [
+                "Customer ID",
+                "Age",
+                "Annual Income",
+                "Purchase History",
+                "Spending Score",
+                "Segment",
+                "Cluster"
+            ],
+
+            "Value": [
+                customer["CustomerID"],
+                f"{int(customer['Age'])} Years",
+                f"₹{float(customer['AnnualIncome']):,.0f}",
+                f"{int(customer['PurchaseHistory'])} Purchases",
+                f"{float(customer['SpendingScore']):.0f} / 100",
+                customer["Customer_Segment"],
+                customer["KMeans_Cluster"]
+            ]
+        })
+
+        st.dataframe(
+            profile,
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+    # --------------------------------------------------------
+    # CUSTOMER VISUALIZATION
+    # --------------------------------------------------------
+
+    with col2:
+
+        st.subheader("📈 Customer Visualization")
+
+        fig, ax = plt.subplots(
+            figsize=(8, 5)
+        )
+
+        segments = df[
+            "Customer_Segment"
+        ].dropna().unique()
+
+
+        for segment in segments:
+
+            segment_data = df[
+                df["Customer_Segment"] == segment
+            ]
+
+            ax.scatter(
+                segment_data["AnnualIncome"],
+                segment_data["SpendingScore"],
+                label=segment,
+                alpha=0.65
+            )
+
+
+        # Highlight selected customer
+
+        ax.scatter(
+            customer["AnnualIncome"],
+            customer["SpendingScore"],
+            marker="*",
+            s=300,
+            edgecolors="black",
+            linewidths=1.5,
+            label="Selected Customer"
+        )
+
+
+        ax.set_title(
+            "Annual Income vs Spending Score"
+        )
+
+        ax.set_xlabel(
+            "Annual Income"
+        )
+
+        ax.set_ylabel(
+            "Spending Score"
+        )
+
+        ax.legend()
+
+        ax.grid(
+            True,
+            alpha=0.20
+        )
+
+        plt.tight_layout()
+
+        st.pyplot(fig)
+
+        plt.close(fig)
+
+
+    st.divider()
+
+
+    # --------------------------------------------------------
+    # MARKETING SUGGESTIONS
+    # --------------------------------------------------------
+
+    st.subheader(
+        "💡 Personalized Marketing Suggestions"
     )
 
-    st.subheader("📂 Customer Segments")
+    st.write(
+        "Marketing strategies available for each customer segment."
+    )
+
+
+    budget = df[
+        df["Customer_Segment"] == "Budget"
+    ]
+
+    regular = df[
+        df["Customer_Segment"] == "Regular"
+    ]
+
+    premium = df[
+        df["Customer_Segment"] == "Premium"
+    ]
+
+    vip = df[
+        df["Customer_Segment"] == "VIP"
+    ]
+
 
     col1, col2, col3, col4 = st.columns(4)
 
+
     with col1:
-        st.info("💰 **Budget**\n\nPrice-sensitive customers")
+
+        st.markdown(
+            f"""
+            <div class="marketing-card">
+                <div class="marketing-title">
+                    💰 Budget
+                </div>
+
+                <div class="marketing-text">
+                    {
+                        budget["Marketing_Suggestion"].iloc[0]
+                        if not budget.empty
+                        else "No suggestion available."
+                    }
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
     with col2:
-        st.info("🛍️ **Regular**\n\nModerate spending customers")
+
+        st.markdown(
+            f"""
+            <div class="marketing-card">
+                <div class="marketing-title">
+                    🛍️ Regular
+                </div>
+
+                <div class="marketing-text">
+                    {
+                        regular["Marketing_Suggestion"].iloc[0]
+                        if not regular.empty
+                        else "No suggestion available."
+                    }
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
     with col3:
-        st.info("💎 **Premium**\n\nHigh-value customers")
+
+        st.markdown(
+            f"""
+            <div class="marketing-card">
+                <div class="marketing-title">
+                    💎 Premium
+                </div>
+
+                <div class="marketing-text">
+                    {
+                        premium["Marketing_Suggestion"].iloc[0]
+                        if not premium.empty
+                        else "No suggestion available."
+                    }
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
     with col4:
-        st.info("👑 **VIP**\n\nMost valuable customers")
+
+        st.markdown(
+            f"""
+            <div class="marketing-card">
+                <div class="marketing-title">
+                    👑 VIP
+                </div>
+
+                <div class="marketing-text">
+                    {
+                        vip["Marketing_Suggestion"].iloc[0]
+                        if not vip.empty
+                        else "No suggestion available."
+                    }
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 
-# ============================================================
-# DASHBOARD
-# ============================================================
+    # --------------------------------------------------------
+    # FOOTER
+    # --------------------------------------------------------
 
-elif page == "📊 Dashboard":
+    st.markdown(
+        """
+        <br>
 
-    st.title("📊 Customer Segmentation Dashboard")
-
-    st.write(
-        "Overview of customer demographics, income and spending behavior."
+        <div style="
+            text-align:center;
+            color:#64748b;
+            font-size:13px;
+            padding:20px;
+        ">
+            Customer Segmentation & Personalized Marketing Platform
+            <br>
+            Built with Python, Pandas, Matplotlib and Streamlit
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-
-    st.divider()
-
     # ========================================================
     # KPI CARDS
     # ========================================================
